@@ -71,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function processCSV(csvText) {
         const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        const bossTargetInput = document.getElementById('bossTarget');
+        const bossTargetName = bossTargetInput.value.trim();
         if (lines.length < 2) {
             result.innerText = "Invalid CSV or no data.";
             return;
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
             if (spellName === 'Penance') {
-                if (targetName.includes('The Candle King')) {
+                if (targetName.includes(bossTargetName)) {
                     spellName = "Penance (D)";
                 }
                 else {
@@ -119,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         result.innerText = output.join('\n');
         showNotification("✅ File Loaded!");
-        result.scrollIntoView({ behavior: "smooth" });
     }
     function showNotification(message) {
         notification.innerText = message;
@@ -129,9 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10); // Fade in quickly
         setTimeout(() => {
             notification.style.opacity = '0';
-        }, 2000); // Start fade out after 2 seconds
+        }, 2000); // Start fade out after 4 seconds
         setTimeout(() => {
             notification.style.display = 'none';
         }, 2500); // Fully remove after fade out
     }
+    const clearButton = document.getElementById('clearButton');
+    clearButton.addEventListener('click', () => {
+        result.innerText = "Your processed spells will appear here...";
+        const fileElem = document.getElementById('fileElem');
+        fileElem.value = "";
+        fileElem.scrollIntoView({ behavior: "smooth" });
+    });
 });

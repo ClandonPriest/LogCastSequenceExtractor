@@ -18,15 +18,25 @@
 
 <h1>WCP Log Cast Sequence Extractor</h1>
 
+<div id="bossTargetBox">
+  <label for="bossTarget">Boss Target Name:</label>
+  <input type="text" id="bossTarget" value="The Candle King" />
+</div>
+
 <div id="drop-area">
   <p>Drag & Drop your CSV file here, or <span id="browseText" style="text-decoration: underline; cursor: pointer;">browse your computer</span>.</p>
   <input type="file" id="fileElem" accept=".csv" style="display:none">
 </div>
 
+
 <div id="instructions" class="instructions">Click anywhere on the list to copy to clipboard</div>
 
 <div id="resultContainer">
   <p id="result" class="clickable">Your processed spells will appear here...</p>
+</div>
+
+<div id="actionButtons">
+  <button id="clearButton">Reset</button>
 </div>
 
 <div id="notification" class="hidden"></div>

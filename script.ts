@@ -67,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function processCSV(csvText: string) {
         const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        const bossTargetInput = document.getElementById('bossTarget') as HTMLInputElement;
+        const bossTargetName = bossTargetInput.value.trim();
         if (lines.length < 2) {
             result.innerText = "Invalid CSV or no data.";
             return;
@@ -116,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (spellName === 'Penance') {
-                if (targetName.includes('The Candle King')) {
+                if (targetName.includes(bossTargetName)) {
                     spellName = "Penance (D)";
                 } else {
                     spellName = "Penance (H)";
@@ -126,9 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
             output.push(spellName);
         }
 
-        result.innerText = output.join('\n');
+        result.innerText = output.join('\n'); 
         showNotification("✅ File Loaded!");
-        result.scrollIntoView({ behavior: "smooth" });
+        
     }
 
     function showNotification(message: string) {
@@ -140,12 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
         setTimeout(() => {
             notification.style.opacity = '0';
-        }, 2000); // Start fade out after 2 seconds
+        }, 2000); // Start fade out after 4 seconds
     
         setTimeout(() => {
             notification.style.display = 'none';
         }, 2500); // Fully remove after fade out
     }
     
+    const clearButton = document.getElementById('clearButton') as HTMLButtonElement;
+
+    clearButton.addEventListener('click', () => {
+        result.innerText = "Your processed spells will appear here...";
+        
+        const fileElem = document.getElementById('fileElem') as HTMLInputElement;
+        fileElem.value = "";
+        fileElem.scrollIntoView({ behavior: "smooth" });
+    });
     
 });
