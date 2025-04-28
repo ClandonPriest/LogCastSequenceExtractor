@@ -1,0 +1,34 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install TypeScript
+      run: npm install -g typescript
+
+    - name: Compile TypeScript
+      run: tsc
+
+    - name: Commit compiled files
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add docs/script.js
+        git commit -m 'Auto-compile TypeScript'
+        git push
+      continue-on-error: true
