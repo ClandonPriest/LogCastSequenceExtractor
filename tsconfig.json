@@ -4,7 +4,7 @@
       "module": "es6",
       "lib": ["es6", "dom"],
       "strict": true,
-      "outDir": "./dist",
+      "outDir": "./docs",
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true
     },
