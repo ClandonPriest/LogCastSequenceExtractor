@@ -3,9 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileElem = document.getElementById('fileElem') as HTMLInputElement;
     const browseText = document.getElementById('browseText') as HTMLSpanElement;
     const result = document.getElementById('result') as HTMLParagraphElement;
+    const processLogButton = document.getElementById('processLogButton') as HTMLButtonElement;
     const notification = document.getElementById('notification') as HTMLDivElement;
     const toggleSwitch = document.getElementById('toggleModeSwitch') as HTMLInputElement;
     const modeLabel = document.getElementById('modeLabel') as HTMLSpanElement;
+    let selectedAllies = new Set<string>();
+    let uploadedLines: string[] = [];
+
 
     browseText.addEventListener('click', (e) => {
         e.stopPropagation(); // prevent event bubbling
@@ -15,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dropArea.addEventListener('dragleave', () => dropArea.classList.remove('highlight'));
     dropArea.addEventListener('drop', handleDrop);
     fileElem.addEventListener('change', handleFiles);
+    
 
     toggleSwitch.addEventListener('change', () => {
         document.body.classList.toggle('light');
@@ -60,15 +65,55 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = function(event) {
             const text = (event.target as FileReader).result as string;
-            processCSV(text);
+            uploadedLines = text.split('\n').filter(line => line.trim() !== '');
+    
+            displayTargetSelection(uploadedLines);
         };
         reader.readAsText(file);
     }
 
+    function displayTargetSelection(lines: string[]) {
+        const targetContainer = document.getElementById('targetSelectionContainer') as HTMLDivElement;
+        const targetsGrid = document.getElementById('targetsGrid') as HTMLDivElement;
+    
+        targetContainer.style.display = 'block';
+        targetsGrid.innerHTML = '';
+    
+        const uniqueTargets = new Set<string>();
+    
+        for (let i = 1; i < lines.length; i++) {
+            const columns = lines[i].split(',');
+            if (columns.length < 4) continue;
+    
+            const fullTargetField = columns[3].trim().replace(/["/]/g, '');
+            const splitTarget = fullTargetField.split('→');
+            let targetName = splitTarget.length > 1 ? splitTarget[1].trim() : fullTargetField;
+            
+            
+            if (targetName) uniqueTargets.add(targetName.replace(/["/]/g, ''));
+        }
+    
+        uniqueTargets.forEach(target => {
+            const div = document.createElement('div');
+            div.className = 'targetItem';
+            div.innerText = target;
+    
+            div.addEventListener('click', () => {
+                if (div.classList.contains('selected')) {
+                    div.classList.remove('selected');
+                    selectedAllies.delete(target.toLowerCase());
+                } else {
+                    div.classList.add('selected');
+                    selectedAllies.add(target.toLowerCase());
+                }
+            });
+    
+            targetsGrid.appendChild(div);
+        });
+    }
+
     function processCSV(csvText: string) {
         const lines = csvText.split('\n').filter(line => line.trim() !== '');
-        const bossTargetInput = document.getElementById('bossTarget') as HTMLInputElement;
-        const bossTargetName = bossTargetInput.value.trim();
         if (lines.length < 2) {
             result.innerText = "Invalid CSV or no data.";
             return;
@@ -90,7 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (columns.length < 4) continue;
 
             let rawSpellName = columns[2].trim();
-            let targetName = columns[3].trim();
+            const fullTargetField = columns[3].trim().replace(/["/]/g, '');
+            const splitTarget = fullTargetField.split('→');
+            let targetName = splitTarget.length > 1 ? splitTarget[1].trim() : fullTargetField;
+            
 
             if (!rawSpellName) continue;
 
@@ -118,12 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (spellName === 'Penance') {
-                if (targetName.includes(bossTargetName)) {
-                    spellName = "Penance (D)";
-                } else {
+                if (selectedAllies.has(targetName.toLowerCase())) {
                     spellName = "Penance (H)";
+                } else {
+                    spellName = "Penance (D)";
                 }
             }
+            
 
             output.push(spellName);
         }
@@ -158,5 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
         fileElem.value = "";
         fileElem.scrollIntoView({ behavior: "smooth" });
     });
+
+    processLogButton.addEventListener('click', () => {
+        if (uploadedLines.length > 0) {
+            processCSV(uploadedLines.join('\n'));
+        }
+    });
+    
     
 });

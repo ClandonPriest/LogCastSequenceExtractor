@@ -18,16 +18,16 @@
 
 <h1>WCP Log Cast Sequence Extractor</h1>
 
-<div id="bossTargetBox">
-  <label for="bossTarget">Boss Target Name:</label>
-  <input type="text" id="bossTarget" value="The Candle King" />
-</div>
-
 <div id="drop-area">
   <p>Drag & Drop your CSV file here, or <span id="browseText" style="text-decoration: underline; cursor: pointer;">browse your computer</span>.</p>
   <input type="file" id="fileElem" accept=".csv" style="display:none">
 </div>
 
+<div id="targetSelectionContainer" style="display:none;">
+  <h2>Select All Allies:</h2>
+  <div id="targetsGrid"></div>
+  <button id="processLogButton">Process Log</button>
+</div>
 
 <div id="instructions" class="instructions">Click anywhere on the list to copy to clipboard</div>
 

@@ -13,9 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileElem = document.getElementById('fileElem');
     const browseText = document.getElementById('browseText');
     const result = document.getElementById('result');
+    const processLogButton = document.getElementById('processLogButton');
     const notification = document.getElementById('notification');
     const toggleSwitch = document.getElementById('toggleModeSwitch');
     const modeLabel = document.getElementById('modeLabel');
+    let selectedAllies = new Set();
+    let uploadedLines = [];
     browseText.addEventListener('click', (e) => {
         e.stopPropagation(); // prevent event bubbling
         fileElem.click();
@@ -65,14 +68,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = function (event) {
             const text = event.target.result;
-            processCSV(text);
+            uploadedLines = text.split('\n').filter(line => line.trim() !== '');
+            displayTargetSelection(uploadedLines);
         };
         reader.readAsText(file);
     }
+    function displayTargetSelection(lines) {
+        const targetContainer = document.getElementById('targetSelectionContainer');
+        const targetsGrid = document.getElementById('targetsGrid');
+        targetContainer.style.display = 'block';
+        targetsGrid.innerHTML = '';
+        const uniqueTargets = new Set();
+        for (let i = 1; i < lines.length; i++) {
+            const columns = lines[i].split(',');
+            if (columns.length < 4)
+                continue;
+            const fullTargetField = columns[3].trim().replace(/["/]/g, '');
+            const splitTarget = fullTargetField.split('→');
+            let targetName = splitTarget.length > 1 ? splitTarget[1].trim() : fullTargetField;
+            if (targetName)
+                uniqueTargets.add(targetName.replace(/["/]/g, ''));
+        }
+        uniqueTargets.forEach(target => {
+            const div = document.createElement('div');
+            div.className = 'targetItem';
+            div.innerText = target;
+            div.addEventListener('click', () => {
+                if (div.classList.contains('selected')) {
+                    div.classList.remove('selected');
+                    selectedAllies.delete(target.toLowerCase());
+                }
+                else {
+                    div.classList.add('selected');
+                    selectedAllies.add(target.toLowerCase());
+                }
+            });
+            targetsGrid.appendChild(div);
+        });
+    }
     function processCSV(csvText) {
         const lines = csvText.split('\n').filter(line => line.trim() !== '');
-        const bossTargetInput = document.getElementById('bossTarget');
-        const bossTargetName = bossTargetInput.value.trim();
         if (lines.length < 2) {
             result.innerText = "Invalid CSV or no data.";
             return;
@@ -90,7 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (columns.length < 4)
                 continue;
             let rawSpellName = columns[2].trim();
-            let targetName = columns[3].trim();
+            const fullTargetField = columns[3].trim().replace(/["/]/g, '');
+            const splitTarget = fullTargetField.split('→');
+            let targetName = splitTarget.length > 1 ? splitTarget[1].trim() : fullTargetField;
             if (!rawSpellName)
                 continue;
             rawSpellName = rawSpellName.replace(/["/]/g, '').trim();
@@ -110,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
             if (spellName === 'Penance') {
-                if (targetName.includes(bossTargetName)) {
-                    spellName = "Penance (D)";
+                if (selectedAllies.has(targetName.toLowerCase())) {
+                    spellName = "Penance (H)";
                 }
                 else {
-                    spellName = "Penance (H)";
+                    spellName = "Penance (D)";
                 }
             }
             output.push(spellName);
@@ -141,5 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const fileElem = document.getElementById('fileElem');
         fileElem.value = "";
         fileElem.scrollIntoView({ behavior: "smooth" });
+    });
+    processLogButton.addEventListener('click', () => {
+        if (uploadedLines.length > 0) {
+            processCSV(uploadedLines.join('\n'));
+        }
     });
 });
