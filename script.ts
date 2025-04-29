@@ -202,11 +202,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearButton.addEventListener('click', () => {
         result.innerText = "Your processed spells will appear here...";
-        
+    
         const fileElem = document.getElementById('fileElem') as HTMLInputElement;
         fileElem.value = "";
-        fileElem.scrollIntoView({ behavior: "smooth" });
+    
+        // Deselect all ally selections
+        const allTargetItems = document.querySelectorAll('.targetItem');
+        allTargetItems.forEach(item => item.classList.remove('selected'));
+    
+        // Clear selectedAllies Set
+        selectedAllies.clear();
+    
+        // (Optional) Hide target selection container
+        const targetContainer = document.getElementById('targetSelectionContainer') as HTMLDivElement;
+        targetContainer.style.display = 'none';
     });
+    
 
     processLogButton.addEventListener('click', () => {
         if (uploadedLines.length > 0) {

@@ -177,7 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
         result.innerText = "Your processed spells will appear here...";
         const fileElem = document.getElementById('fileElem');
         fileElem.value = "";
-        fileElem.scrollIntoView({ behavior: "smooth" });
+        // Deselect all ally selections
+        const allTargetItems = document.querySelectorAll('.targetItem');
+        allTargetItems.forEach(item => item.classList.remove('selected'));
+        // Clear selectedAllies Set
+        selectedAllies.clear();
+        // (Optional) Hide target selection container
+        const targetContainer = document.getElementById('targetSelectionContainer');
+        targetContainer.style.display = 'none';
     });
     processLogButton.addEventListener('click', () => {
         if (uploadedLines.length > 0) {
